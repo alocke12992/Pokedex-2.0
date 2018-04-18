@@ -1,15 +1,22 @@
 import React, { Component } from 'react';
-import { Card, Image } from 'semantic-ui-react';
+import { Card, Image, Button, Icon } from 'semantic-ui-react';
 import axios from 'axios'
 
 class Home extends Component {
-  state = {cards: []}
+  state = {cards: [], myCards: []}
 
-  componentDidMount(){
-    axios.get('/api/cards')
-      .then(res => {
-        this.setState({cards: res.data})
-      })
+  // componentDidMount(){
+  //   axios.get('/api/cards')
+  //     .then(res => {
+  //       this.setState({cards: res.data})
+  //     })
+  // }
+
+  addCard = (card) => {
+    debugger
+    const {myCards} = this.state
+    const {newDeck} = [...myCards, card]
+    this.setState({myCards: newDeck})
   }
 
 
@@ -17,14 +24,11 @@ class Home extends Component {
     return(
       <Card key={card.id}>
         <Image src={card.imageUrl} />
-        <Card.Header>
-          {card.name}
-        </Card.Header>
-        <Card.Meta>
-          {card.supertype} - {card.subtype}
-        </Card.Meta>
-        <Card.Description>
-        </Card.Description>
+        <Button 
+          circular 
+          icon='plus'
+          onClick={() => this.addCard(card)}
+        ></Button>
       </Card>
     )
   }
@@ -33,9 +37,9 @@ class Home extends Component {
     const {cards} = this.state
     return(
       <Card.Group>
-        {cards.map( card => 
+        {/* {cards.map( card => 
             this.showCard(card)
-        )}
+        )} */}
       </Card.Group>
     )
   }

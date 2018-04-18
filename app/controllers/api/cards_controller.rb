@@ -1,7 +1,7 @@
 class Api::CardsController < ApplicationController
   
   def index
-    cards = Pokemon::Card.where(page: 1, pageSize: 100)
+    cards = Pokemon::Card.where(set: "Base")
     render json: cards
   end 
 end
