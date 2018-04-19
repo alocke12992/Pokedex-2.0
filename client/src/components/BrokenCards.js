@@ -1,7 +1,6 @@
 import React, {Fragment} from 'react';
 import axios from 'axios';
 import InfiniteScroll from 'react-infinite-scroller';
-import Pokeball from './Pokeball';
 import {connect} from 'react-redux';
 import {Link} from 'react-router-dom';
 import {setFlash} from '../actions/flash';
@@ -22,13 +21,32 @@ import {
 } from 'semantic-ui-react';
 
 class Cards extends React.Component {
-  state = {cards: [], searchResults: [], myCards: [], searchTerm: '', toggleQuery: false, loading: true}
+  state = {cards: [], searchResults: [], myCards: [], searchTerm: '', toggleQuery: false, loading: true, page: 1, hasMore: true, totalPages: 20}
+// THIS HAS THE INFIINIATE SCROLLER IN IT
 
   componentDidMount() {
+    this.fetchCards()
+  }
+
+  componentWillReceiveProps(nextProps) {
+
+    this.setState({cards: [], loading: true, hasMore: true});
+    this.fetchCards(nextProps, 1);
+  }
+
+  fetchCards = (props) => {
     const {dispatch} = this.props;
-    axios.get('/api/cards')
+    const {totalPages, page} = this.state
+    axios.get(`/api/cards?page=${page}&perPage=20`)
       .then(res => {
-        this.setState({cards: res.data})
+        const {data} = res;
+        if (totalPages) {
+          if (totalPages === page)
+            this.setState({hasMore: false});
+          this.setState({cards: [...this.state.cards, ...data.data], page})
+        } else {
+          this.setState({cards: data.data, hasMore: false})
+        }
       })
       .catch(err => {
         dispatch(setFlash('Unable to retrieve cards. Please try again', 'red'))
@@ -38,20 +56,37 @@ class Cards extends React.Component {
       });
   }
 
+
+  loadMoreCards = () => {
+    console.log(this.state.hasMore)
+    debugger
+    const {page} = this.state
+    this.setState({page: page + 1})
+    this.fetchCards(this.props)
+  }
+
+
+
   loadingMessage = () => {
     return (
       <Dimmer active style={{height: '100vh'}}>
-        <Pokeball />
-        <Header style={{color: 'white !important'}} as='h3'>
-          Loading
-        </Header>
+        {/* 
+        Commented Out until I can figure out how to get this to run
+        <div className="wrapper">
+          <div id='loader'>
+            <div id="top"></div>
+            <div id="center"></div>
+            <div id="bottom"></div>
+          </div>
+        </div> */}
+        <Loader size='massive'>Loading</Loader>
       </Dimmer>
     );
   }
 
   searchBar = () => {
     const {searchTerm} = this.state
-    return(
+    return (
       <Form onSubmit={this.handleSubmit}>
         <Form.Input
           name='searchTerm'
@@ -72,52 +107,45 @@ class Cards extends React.Component {
   handleSubmit = (e) => {
     e.preventDefault
     this.searchCards()
-    this.setState({ searchTerm: '', toggleQuery: true})
+    this.setState({searchTerm: '', toggleQuery: true})
   }
 
   searchCards = () => {
-    const {cards, searchTerm, searchResults } = this.state
-    let results = [] 
+    const {cards, searchTerm, searchResults} = this.state
+    let results = []
     let term = searchTerm.toLowerCase()
-    if (term === 'all'){
-      this.setState({ searchResults: cards})
+    if (term === 'all') {
+      this.setState({searchResults: cards})
     } else {
       cards.map((card) => {
         card.name.toLowerCase().includes(searchTerm.toLowerCase()) ?
           results.push(card)
-        : 
-          null 
+          :
+          null
       })
       this.setState({searchResults: results})
     }
   }
 
   displayCards = () => {
-    const {searchResults} = this.state;    
+    const {searchResults} = this.state;
     return searchResults.map((result, i) => {
       return (
         <Card key={i}>
           <Image src={result.imageUrl} />
-          {this.button()}
-        </Card>
-      );
-    });
-  }
-
-  showAll = () => {
-    const {cards} = this.state
-    return cards.map((result, i) => {
-      return (
-        <Card key={i}>
-          <Image src={result.imageUrl} />
-          {this.button(result)}
+          <Button
+            circular
+            onClick={() => this.getCard(result)}
+          >
+            Add
+          </Button>
         </Card>
       );
     });
   }
 
   noResults = () => {
-    return(
+    return (
       <Header>No Cards Found</Header>
     )
   }
@@ -130,34 +158,8 @@ class Cards extends React.Component {
     dispatch(addCard(card))
   }
 
-  button = (result) => {
-    const {user} = this.props 
-    return(
-      <Fragment>
-        {user.id ? 
-          <Button
-            circular
-            onClick={() => this.getCard(result)}
-          >
-            Add
-          </Button>
-          :
-          <Link to='/register'>
-            <Button
-              circular
-              disabled
-              style={{width: '100% !important'}}
-            >
-              Sign in to add
-            </Button>
-          </Link>
-        }
-      </Fragment>
-    )
-  }
-
   render() {
-    const {loading, searchResults, toggleQuery} = this.state;
+    const {loading, searchResults, toggleQuery, page, totalPages} = this.state;
     if (loading) {
       return (
         <Container>
@@ -169,29 +171,31 @@ class Cards extends React.Component {
         <Grid centered>
           <Grid.Row centered>
             <Grid.Column width={10}>
-            {this.searchBar()}
+              {this.searchBar()}
             </Grid.Column>
           </Grid.Row>
           <Grid.Row centered>
             <Grid.Column width={14}>
               {searchResults.length === 0 && toggleQuery === true ?
                 this.noResults()
-              :
+                :
                 <Fragment>
                   <Header as='h1' textAlign='center' inverted>Results</Header>
-                  <Container style={{height: '100vh', overflowY: 'scroll', overflowX: 'hidden'}}>
-                    <InfiniteScroll
-                      useWindow={false}
-                    >
-                      <Card.Group stackable itemsPerRow={3}>
-                        {searchResults.length === 0 ? 
-                          this.showAll()
-                        :
-                          this.displayCards()
-                        }
-                      </Card.Group>
-                    </InfiniteScroll>
-                  </Container>
+                  <Segment>
+                    <Container style={{height: '250px', overflowY: 'scroll', overflowX: 'hidden'}}>
+                      <InfiniteScroll
+                        useWindow={false}
+                        pageStart={page}
+                        loadMore={this.loadMoreCards}
+                        hasMore={page < totalPages}
+                        initialLoad={false}
+                      >
+                        <Card.Group stackable itemsPerRow={3}>
+                          {this.displayCards()}
+                        </Card.Group>
+                      </InfiniteScroll>
+                    </Container>
+                  </Segment>
                 </Fragment>
               }
             </Grid.Column>
@@ -202,10 +206,5 @@ class Cards extends React.Component {
   }
 
 }
-const mapStateToProps = (state) => {
-  return {
-    user: state.user
-  }
-}
 
-export default connect(mapStateToProps)(Cards);
+export default connect()(Cards);

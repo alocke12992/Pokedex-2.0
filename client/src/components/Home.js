@@ -1,48 +1,33 @@
-import React, { Component } from 'react';
-import { Card, Image, Button, Icon } from 'semantic-ui-react';
-import axios from 'axios'
+import React from 'react'
+import {Header, Button, Segment, Container, Image, Grid, Divider} from 'semantic-ui-react'
+import {Link} from 'react-router-dom';
+import background from '../assets/img/background.png';
+import Pokeball from './Pokeball';
+import styled from 'styled-components';
 
-class Home extends Component {
-  state = {cards: [], myCards: []}
+const Home = () => (
+  <Background>
+    <Splash verticalAlign='middle' centered>
+      <Grid.Row>
+        <Grid.Column>
+          <Link to='/cards'>
+            <Pokeball />
+          </Link>
+        </Grid.Column>
+      </Grid.Row>
+    </Splash>
+  </Background>
+)
 
-  // componentDidMount(){
-  //   axios.get('/api/cards')
-  //     .then(res => {
-  //       this.setState({cards: res.data})
-  //     })
-  // }
+const Background = styled.div `
+  background: url(${background}) no-repeat center fixed;
+  background-size: cover;
+  padding: 0;
+  height: 100vh;
+`
 
-  addCard = (card) => {
-    debugger
-    const {myCards} = this.state
-    const {newDeck} = [...myCards, card]
-    this.setState({myCards: newDeck})
-  }
-
-
-  showCard = (card) => {
-    return(
-      <Card key={card.id}>
-        <Image src={card.imageUrl} />
-        <Button 
-          circular 
-          icon='plus'
-          onClick={() => this.addCard(card)}
-        ></Button>
-      </Card>
-    )
-  }
-
-  render(){
-    const {cards} = this.state
-    return(
-      <Card.Group>
-        {/* {cards.map( card => 
-            this.showCard(card)
-        )} */}
-      </Card.Group>
-    )
-  }
-}
+const Splash = styled(Grid)`
+  height: 100% !important;
+`
 
 export default Home;

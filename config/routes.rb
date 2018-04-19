@@ -2,6 +2,10 @@ Rails.application.routes.draw do
   mount_devise_token_auth_for 'User', at: 'api/auth'
   namespace :api do
     resources :cards
+    get '/my_cards', to: 'cards#my_cards'
+    get '/types', to: 'types#types'
+    get '/subtypes', to: 'types#subtypes'
+    get '/supertypes', to: 'types#supertypes'
   end
 
   #Do not place any routes below this one
