@@ -4,12 +4,14 @@ import {Link} from 'react-router-dom';
 import background from '../assets/img/background.png';
 import Pokeball from './Pokeball';
 import styled from 'styled-components';
+import logo from '../assets/Pokemon-TCG.png'
 
 const Home = () => (
   <Background>
     <Splash verticalAlign='middle' centered>
-      <Grid.Row>
-        <Grid.Column>
+      <Grid.Row centered>
+        <Grid.Column textAlign='center' width={8}>
+          <Image src={logo} />
           <Link to='/cards'>
             <Pokeball />
           </Link>
@@ -29,5 +31,6 @@ const Background = styled.div `
 const Splash = styled(Grid)`
   height: 100% !important;
 `
+
 
 export default Home;

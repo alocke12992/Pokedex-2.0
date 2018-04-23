@@ -11,13 +11,16 @@ class NavBar extends Component {
     if (user.id) {
       return (
         <Menu.Menu position='right'>
+          <Link to='/my_cards'>
+            <Menu.Item name='My Cards' />
+          </Link>
+          <Link to='/cards'>
+            <Menu.Item name='All Cards' />
+          </Link>
           <Menu.Item
             name='Logout'
             onClick={() => dispatch(handleLogout(history))}
           />
-          <Link to='/my_cards'>
-            <Menu.Item name='My Cards' />
-          </Link>
         </Menu.Menu>
       );
     }

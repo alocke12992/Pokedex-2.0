@@ -23,8 +23,8 @@ class MyCards extends React.Component{
       <Background>
         <Splash verticalAlign='middle' centered>
           <Grid.Row centered>
-            <Grid.Column textAlign='center'>
-              <Header>My Cards</Header>
+            <Grid.Column textAlign='center' width={12}>
+              <Header as='h1'>My Cards</Header>
               <Card.Group>
                 {console.log(cards)}
                 {cards.map( data => {
